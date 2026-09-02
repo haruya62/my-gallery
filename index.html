@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Photo Gallery</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .gallery img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #222;
+      display: block;
+    }
+    #loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading">画像を読み込み中...</div>
+  <div class="gallery" id="gallery"></div>
+
+  <script>
+    // =======================================================
+    // ご自身の GitHub ユーザー名とリポジトリ名に書き換えてください
+    // =======================================================
+    const USERNAME = 'haruya62';
+    const REPO = 'my-gallery';
+
+    // GitHub API を使ってリポジトリ内のファイル一覧を直接取得
+    const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/`;
+    const imageExtensions = /\.(jpe?g|png|gif|webp|svg)$/i;
+
+    fetch(apiUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('取得失敗');
+        return res.json();
+      })
+      .then(files => {
+        document.getElementById('loading').style.display = 'none';
+        const gallery = document.getElementById('gallery');
+
+        files.forEach(file => {
+          // 画像ファイルのみを判別して画面に追加
+          if (file.type === 'file' && imageExtensions.test(file.name)) {
+            const img = document.createElement('img');
+            img.src = file.download_url; // 画像の直リンク
+            img.loading = 'lazy';
+            gallery.appendChild(img);
+          }
+        });
+      })
+      .catch(err => {
+        document.getElementById('loading').innerText = '画像の読み込みに失敗しました。ユーザー名とリポジトリ名を確認してください。';
+        console.error(err);
+      });
+  </script>
+
+</body>
+</html>
